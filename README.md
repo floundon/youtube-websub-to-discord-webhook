@@ -2,11 +2,11 @@
 
 ## Requirements
 
-### Language/Tools
+### Tools
 
 - Go 1.16 or later
 
-### Deployments
+### For Deployment
 
 - AWS Account
 - [aws-sam-cli](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
