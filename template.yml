@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  WebSubVerificationToken:
+    Type: String
+    NoEcho: true
+
+Resources:
+  WebSubFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda
+      CodeUri: 'cmd/lambda'
+      Runtime: go1.x
+      Events:
+        VerifySubscription:
+          Type: Api
+          Properties:
+            Path: '/websub/subscribe'
+            Method: get
+        ReceiveNotification:
+          Type: Api
+          Properties:
+            Path: '/websub/subscribe'
+            Method: post
+      Environment:
+        Variables:
+          WEBSUB_VERIFICATION_TOKEN: !Ref WebSubVerificationToken
