@@ -9,12 +9,53 @@ Parameters:
     NoEcho: true
 
 Resources:
+  YouTubeVideoDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['-', ['youtube-video-data', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref AWS::StackId]]]]]]
+      AttributeDefinitions:
+        -
+          AttributeName: VideoID
+          AttributeType: S
+      KeySchema:
+        -
+          AttributeName: VideoID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: dynamodb-access-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:Get*'
+                  - 'dynamodb:PutItem'
+                Resource: !GetAtt YouTubeVideoDataTable.Arn
+
   WebSubFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda
       CodeUri: 'cmd/lambda'
       Runtime: go1.x
+      Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         VerifySubscription:
           Type: Api
@@ -30,3 +71,4 @@ Resources:
         Variables:
           WEBSUB_VERIFICATION_TOKEN: !Ref WebSubVerificationToken
           WEBHOOK_URL: !Ref WebHookURL
+          DYNAMODB_TABLE_NAME: !Select [1, !Split ['/', !GetAtt YouTubeVideoDataTable.Arn]]
