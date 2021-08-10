@@ -38,23 +38,31 @@ func ReceiveNotification(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("%+v\n", request)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	err := discordwebhook.SendWithContext(ctx, config.Get().WebHookURL, &discordwebhook.Request{
-		Content: fmt.Sprintf(`
-新しいライブ配信・動画が登録されました。
-New Live Stream or Video has been added.
-Title: %s
-YouTube: %s
-`, request.Entries[0].Title, request.Entries[0].Link.HRef.String()),
-	})
-
-	if err != nil {
-		fmt.Printf("error: %s", err.Error())
+	if len(request.Entries) == 0 {
+		c.String(http.StatusOK, "no entries to notify")
+		return
 	}
 
-	c.String(http.StatusOK, "")
+	fmt.Printf("%+v\n", request)
+
+	for _, entry := range request.Entries {
+		func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+
+			err := discordwebhook.SendWithContext(ctx, config.Get().WebHookURL, &discordwebhook.Request{
+				Content: fmt.Sprintf(`
+新しいライブ配信・動画が登録されました。
+New Live Stream or Video has been added.
+YouTube: %s
+`, entry.Link.HRef.String()),
+			})
+
+			if err != nil {
+				fmt.Printf("error: %s", err.Error())
+			}
+		}()
+	}
+
+	c.String(http.StatusOK, "ok")
 }
