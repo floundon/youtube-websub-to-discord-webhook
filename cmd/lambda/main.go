@@ -6,15 +6,14 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	ginAdapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/floundon/youtube-websub-to-discord-webhook/config"
 	"github.com/floundon/youtube-websub-to-discord-webhook/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/dynamo"
-	"log"
 )
 
-var ginLambda *ginadapter.GinLambda
+var ginLambda *ginAdapter.GinLambda
 
 func init() {
 	r := gin.Default()
@@ -31,7 +30,7 @@ func init() {
 	r.GET("/websub/subscribe", webSubHandler.VerifySubscription)
 	r.POST("/websub/subscribe", webSubHandler.ReceiveNotification)
 
-	ginLambda = ginadapter.New(r)
+	ginLambda = ginAdapter.New(r)
 }
 
 func ginHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
