@@ -8,14 +8,14 @@ import (
 )
 
 func TestDateTime_UnmarshalXML(t *testing.T) {
-	cases := []struct{
-		message string
-		input string
+	cases := []struct {
+		message    string
+		input      string
 		expectFunc func(t *testing.T, parsedTime time.Time)
 	}{
 		{
 			message: "success(published)",
-			input: "<published>2015-03-06T21:40:57+00:00</published>",
+			input:   "<published>2015-03-06T21:40:57+00:00</published>",
 			expectFunc: func(t *testing.T, parsedTime time.Time) {
 				assert.Equal(t, parsedTime.Year(), 2015)
 				assert.Equal(t, parsedTime.Hour(), 21)
@@ -26,7 +26,7 @@ func TestDateTime_UnmarshalXML(t *testing.T) {
 		},
 		{
 			message: "success(updated)",
-			input: "<updated>2015-03-09T19:05:24.552394234+00:00</updated>",
+			input:   "<updated>2015-03-09T19:05:24.552394234+00:00</updated>",
 			expectFunc: func(t *testing.T, parsedTime time.Time) {
 				assert.Equal(t, parsedTime.Year(), 2015)
 				assert.Equal(t, parsedTime.Hour(), 19)

@@ -14,9 +14,9 @@ const MaxContentLength = 2000
 const requestContentType = "application/json"
 
 type Request struct {
-	Username string `json:"username,omitempty"`
+	Username  string `json:"username,omitempty"`
 	AvatarURL string `json:"avatar_url,omitempty"`
-	Content string `json:"content"`
+	Content   string `json:"content"`
 }
 
 func (r *Request) Validate() error {

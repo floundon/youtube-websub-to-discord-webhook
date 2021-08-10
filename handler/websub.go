@@ -13,7 +13,7 @@ import (
 
 type SubscriptionRequest struct {
 	VerificationToken string `form:"hub.verify_token"`
-	Challenge string `form:"hub.challenge"`
+	Challenge         string `form:"hub.challenge"`
 }
 
 func VerifySubscription(c *gin.Context) {
@@ -44,7 +44,7 @@ func ReceiveNotification(c *gin.Context) {
 	defer cancel()
 
 	err := discordwebhook.SendWithContext(ctx, config.Get().WebHookURL, &discordwebhook.Request{
-		Content:   fmt.Sprintf(`
+		Content: fmt.Sprintf(`
 新しいライブ配信・動画が登録されました。
 New Live Stream or Video has been added.
 Title: %s
