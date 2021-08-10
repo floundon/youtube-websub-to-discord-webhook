@@ -4,6 +4,7 @@ import "os"
 
 type Config struct {
 	VerificationToken string
+	WebHookURL string
 }
 
 var config Config
@@ -15,6 +16,13 @@ func init() {
 				panic("verification token is not specified")
 			}
 			return envToken
+		}(),
+		WebHookURL: func() string {
+			envURL := os.Getenv("WEBHOOK_URL")
+			if envURL == "" {
+				panic("webhook url is not specified")
+			}
+			return envURL
 		}(),
 	}
 }

@@ -4,6 +4,9 @@ Parameters:
   WebSubVerificationToken:
     Type: String
     NoEcho: true
+  WebHookURL:
+    Type: String
+    NoEcho: true
 
 Resources:
   WebSubFunction:
@@ -26,3 +29,4 @@ Resources:
       Environment:
         Variables:
           WEBSUB_VERIFICATION_TOKEN: !Ref WebSubVerificationToken
+          WEBHOOK_URL: !Ref WebHookURL
