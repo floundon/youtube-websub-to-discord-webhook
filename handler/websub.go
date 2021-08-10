@@ -78,9 +78,12 @@ YouTube: %s
 			})
 
 			if err != nil {
-				fmt.Printf("error: %s", err.Error())
+				log.Printf("error: %s", err.Error())
 			} else {
-				h.YouTubeVideoDataTable.Put(&videoData).Run()
+				err = h.YouTubeVideoDataTable.Put(&videoData).Run()
+				if err != nil {
+					log.Printf("dynamodb put error: %s", err.Error())
+				}
 			}
 		}()
 	}
