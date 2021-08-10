@@ -6,12 +6,12 @@ build: template.yml $(SRCS)
 .aws-sam: build
 
 package: .aws-sam
-	sam package --s3-bucket floundon-sam-package > packaged.yml
+	sam package --s3-bucket $(SAM_PACKAGE_BUCKET) > packaged.yml
 
 packaged.yml: package
 
 deploy: packaged.yml
-	sam deploy --template-file packaged.yml --stack-name youtube-websub-to-discord-webhook-stack --capabilities CAPABILITY_IAM
+	sam deploy --template-file packaged.yml --stack-name $(DEPLOY_STACK_NAME) --capabilities CAPABILITY_IAM
 
 tidy:
 	go mod tidy

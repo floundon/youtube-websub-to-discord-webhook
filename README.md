@@ -14,3 +14,28 @@
 ## Architecture
 
 ![Architecture](arch.svg)
+
+## Building and Deployment
+
+### Environment Variables
+
+- `SAM_PACKAGE_BUCKET`: Target bucket to package sam application
+- `DEPLOY_STACK_NAME`: Stack name to deploy
+
+### Build
+
+```shell
+$ make build
+```
+
+### Package
+
+```shell
+$ make package
+```
+
+### Deploy
+
+```shell
+$ make deploy
+```
