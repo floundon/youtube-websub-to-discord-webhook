@@ -2,24 +2,36 @@ package main
 
 import (
 	"context"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	ginAdapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	"github.com/floundon/youtube-websub-to-discord-webhook/config"
 	"github.com/floundon/youtube-websub-to-discord-webhook/handler"
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/guregu/dynamo"
 )
 
-var ginLambda *ginadapter.GinLambda
+var ginLambda *ginAdapter.GinLambda
 
 func init() {
-	log.Printf("Gin cold start")
-
 	r := gin.Default()
-	r.GET("/websub/subscribe", handler.VerifySubscription)
-	r.POST("/websub/subscribe", handler.ReceiveNotification)
 
-	ginLambda = ginadapter.New(r)
+	db := dynamo.New(session.Must(session.NewSessionWithOptions(session.Options{
+		Config: aws.Config{
+			Region: aws.String("ap-northeast-1"),
+		},
+	})))
+	webSubHandler := &handler.WebSubHandler{
+		YouTubeVideoDataTable: db.Table(config.Get().YouTubeVideoDataTableName),
+	}
+
+	r.GET("/websub/subscribe", webSubHandler.VerifySubscription)
+	r.POST("/websub/subscribe", webSubHandler.ReceiveNotification)
+
+	ginLambda = ginAdapter.New(r)
 }
 
 func ginHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
