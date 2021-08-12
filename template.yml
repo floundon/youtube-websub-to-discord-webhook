@@ -20,6 +20,9 @@ Resources:
         -
           AttributeName: VideoID
           AttributeType: S
+        -
+          AttributeName: ScheduledAt
+          AttributeType: Date
       KeySchema:
         -
           AttributeName: VideoID

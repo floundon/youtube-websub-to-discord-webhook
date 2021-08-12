@@ -26,7 +26,8 @@ type SubscriptionRequest struct {
 }
 
 type youTubeVideoData struct {
-	VideoID string `dynamo:"VideoID"`
+	VideoID     string    `dynamo:"VideoID"`
+	ScheduledAt time.Time `dynamo:"ScheduledAt"`
 }
 
 const defaultTimeLayout = "2006-01-02 15:04"
@@ -63,10 +64,10 @@ func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
 	for _, entry := range request.Entries {
 		func() {
 			var videoData youTubeVideoData
+			alreadySent := false
 			err := h.YouTubeVideoDataTable.Get("VideoID", entry.YouTubeVideoID).One(&videoData)
 			if err == nil {
-				log.Printf("notification already sent for Video ID: %s\n", entry.YouTubeVideoID)
-				return
+				alreadySent = true
 			}
 
 			videoID := entry.YouTubeVideoID
@@ -81,6 +82,27 @@ func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
 				return
 			}
 
+			discordTemplate := `
+新しいライブ配信・動画が登録されました。 / New Live Stream or Video has been added.
+開始時刻 / Scheduled at: %s(JST) / %s(UTC)
+%s
+`
+
+			// 既に通知が送られていて、開始時刻が一緒の場合は通知しない
+			if alreadySent {
+				if videoData.ScheduledAt == liveData.ScheduledStartTime {
+					log.Printf("notification is already sent: videoID=%s", videoID)
+					return
+				} else {
+					discordTemplate = `
+ライブ配信の開始時間が変更されました。 / Live Stream schedule has changed.
+開始時刻 / Scheduled at: %s(JST) / %s(UTC)
+%s
+`
+				}
+			}
+			videoData.ScheduledAt = liveData.ScheduledStartTime
+
 			utc := time.FixedZone("UTC", 0)
 			jst := time.FixedZone("Asia/Tokyo", 9*60*60)
 
@@ -91,11 +113,12 @@ func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
 			defer postCancel()
 
 			err = discordwebhook.SendWithContext(postCtx, config.Get().WebHookURL, &discordwebhook.Request{
-				Content: fmt.Sprintf(`
-新しいライブ配信・動画が登録されました。 / New Live Stream or Video has been added.
-Scheduled At: %s(JST) / %s(UTC)
-Link: %s
-`, jstStartTime.Format(defaultTimeLayout), utcStartTime.Format(defaultTimeLayout), entry.Link.HRef.String()),
+				Content: fmt.Sprintf(
+					discordTemplate,
+					jstStartTime.Format(defaultTimeLayout),
+					utcStartTime.Format(defaultTimeLayout),
+					entry.Link.HRef.String(),
+				),
 			})
 
 			if err != nil {
