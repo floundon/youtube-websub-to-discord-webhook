@@ -1,4 +1,4 @@
-package youtube
+package youtubepubsub
 
 import "encoding/xml"
 

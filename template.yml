@@ -7,6 +7,9 @@ Parameters:
   WebHookURL:
     Type: String
     NoEcho: true
+  YouTubeAPIKey:
+    Type: String
+    NoEcho: true
 
 Resources:
   YouTubeVideoDataTable:
@@ -76,3 +79,4 @@ Resources:
           WEBSUB_VERIFICATION_TOKEN: !Ref WebSubVerificationToken
           WEBHOOK_URL: !Ref WebHookURL
           YOUTUBE_VIDEO_DATA_TABLE_NAME: !Select [1, !Split ['/', !GetAtt YouTubeVideoDataTable.Arn]]
+          YOUTUBE_API_KEY: !Ref YouTubeAPIKey

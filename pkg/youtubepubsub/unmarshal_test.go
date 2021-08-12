@@ -1,9 +1,10 @@
-package youtube
+package youtubepubsub
 
 import (
 	"encoding/xml"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var sampleFeed = []byte(`

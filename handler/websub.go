@@ -3,14 +3,17 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/floundon/youtube-websub-to-discord-webhook/config"
-	"github.com/floundon/youtube-websub-to-discord-webhook/pkg/discordwebhook"
-	"github.com/floundon/youtube-websub-to-discord-webhook/pkg/youtube"
-	"github.com/gin-gonic/gin"
-	"github.com/guregu/dynamo"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/floundon/youtube-websub-to-discord-webhook/pkg/youtubedatapi"
+
+	"github.com/floundon/youtube-websub-to-discord-webhook/config"
+	"github.com/floundon/youtube-websub-to-discord-webhook/pkg/discordwebhook"
+	"github.com/floundon/youtube-websub-to-discord-webhook/pkg/youtubepubsub"
+	"github.com/gin-gonic/gin"
+	"github.com/guregu/dynamo"
 )
 
 type WebSubHandler struct {
@@ -25,6 +28,8 @@ type SubscriptionRequest struct {
 type youTubeVideoData struct {
 	VideoID string `dynamo:"VideoID"`
 }
+
+const defaultTimeLayout = "2006-01-02 15:04"
 
 func (*WebSubHandler) VerifySubscription(c *gin.Context) {
 	var request SubscriptionRequest
@@ -42,7 +47,7 @@ func (*WebSubHandler) VerifySubscription(c *gin.Context) {
 }
 
 func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
-	var request youtube.Feed
+	var request youtubepubsub.Feed
 	if err := c.ShouldBindXML(&request); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -64,21 +69,37 @@ func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
 				return
 			}
 
-			videoData.VideoID = entry.YouTubeVideoID
+			videoID := entry.YouTubeVideoID
+			videoData.VideoID = videoID
 
-			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-			defer cancel()
+			fetchCtx, fetchCancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer fetchCancel()
 
-			err = discordwebhook.SendWithContext(ctx, config.Get().WebHookURL, &discordwebhook.Request{
+			liveData, err := youtubedatapi.FetchVideoData(fetchCtx, config.Get().YouTubeAPIKey, videoID)
+			if err != nil {
+				log.Printf("fetch video data error: %s", err.Error())
+				return
+			}
+
+			utc := time.FixedZone("UTC", 0)
+			jst := time.FixedZone("Asia/Tokyo", 9*60*60)
+
+			utcStartTime := liveData.ScheduledStartTime.In(utc)
+			jstStartTime := liveData.ScheduledStartTime.In(jst)
+
+			postCtx, postCancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer postCancel()
+
+			err = discordwebhook.SendWithContext(postCtx, config.Get().WebHookURL, &discordwebhook.Request{
 				Content: fmt.Sprintf(`
-新しいライブ配信・動画が登録されました。
-New Live Stream or Video has been added.
-YouTube: %s
-`, entry.Link.HRef.String()),
+新しいライブ配信・動画が登録されました。 / New Live Stream or Video has been added.
+Scheduled At: %s(JST) / %s(UTC)
+Link: %s
+`, jstStartTime.Format(defaultTimeLayout), utcStartTime.Format(defaultTimeLayout), entry.Link.HRef.String()),
 			})
 
 			if err != nil {
-				log.Printf("error: %s", err.Error())
+				log.Printf("discord webhook post error: %s", err.Error())
 			} else {
 				err = h.YouTubeVideoDataTable.Put(&videoData).Run()
 				if err != nil {

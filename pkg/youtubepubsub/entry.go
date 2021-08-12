@@ -1,4 +1,4 @@
-package youtube
+package youtubepubsub
 
 type Entry struct {
 	ID string `xml:"id"`
@@ -15,7 +15,7 @@ type Entry struct {
 	// Link Video Link
 	Link Link `xml:"link"`
 
-	// Author Author information
+	// Author Video author information
 	Author Author `xml:"author"`
 
 	// PublishedDate Published date
