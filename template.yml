@@ -60,15 +60,17 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         VerifySubscription:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: '/websub/subscribe'
             Method: get
+            PayloadFormatVersion: '1.0'
         ReceiveNotification:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: '/websub/subscribe'
             Method: post
+            PayloadFormatVersion: '1.0'
       Environment:
         Variables:
           WEBSUB_VERIFICATION_TOKEN: !Ref WebSubVerificationToken
