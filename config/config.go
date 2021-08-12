@@ -1,43 +1,36 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 type Config struct {
 	VerificationToken         string
 	WebHookURL                string
 	YouTubeVideoDataTableName string
+	YouTubeAPIKey             string
 }
 
 var config Config
 
 func init() {
 	config = Config{
-		VerificationToken: func() string {
-			envToken := os.Getenv("WEBSUB_VERIFICATION_TOKEN")
-			if envToken == "" {
-				panic("verification token is not specified")
-			}
-			return envToken
-		}(),
-
-		WebHookURL: func() string {
-			envURL := os.Getenv("WEBHOOK_URL")
-			if envURL == "" {
-				panic("webhook url is not specified")
-			}
-			return envURL
-		}(),
-
-		YouTubeVideoDataTableName: func() string {
-			tableName := os.Getenv("YOUTUBE_VIDEO_DATA_TABLE_NAME")
-			if tableName == "" {
-				panic("youtube video data table name is not specified")
-			}
-			return tableName
-		}(),
+		VerificationToken:         mustEnvironment("WEBSUB_VERIFICATION_TOKEN"),
+		WebHookURL:                mustEnvironment("WEBHOOK_URL"),
+		YouTubeVideoDataTableName: mustEnvironment("YOUTUBE_VIDEO_DATA_TABLE_NAME"),
+		YouTubeAPIKey:             mustEnvironment("YOUTUBE_API_KEY"),
 	}
 }
 
 func Get() Config {
 	return config
+}
+
+func mustEnvironment(env string) string {
+	variable := os.Getenv(env)
+	if variable == "" {
+		panic(fmt.Sprintf("environment variable %s is required", env))
+	}
+	return variable
 }

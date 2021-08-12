@@ -1,10 +1,11 @@
-package youtube
+package youtubepubsub
 
 import (
 	"encoding/xml"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDateTime_UnmarshalXML(t *testing.T) {
