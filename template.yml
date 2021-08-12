@@ -60,12 +60,12 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         VerifySubscription:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: '/websub/subscribe'
             Method: get
         ReceiveNotification:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: '/websub/subscribe'
             Method: post
