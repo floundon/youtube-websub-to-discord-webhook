@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: 1.16
       - name: run golangci-lint
-        uses: reviewdog/action-golangci-lint@v1
+        uses: reviewdog/action-golangci-lint@v2
         with:
           reporter: github-pr-review
           filter_mode: diff_context
