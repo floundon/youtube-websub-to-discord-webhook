@@ -8,7 +8,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v2
       - name: setup go golang
-        uses: actions/setup-go@2
+        uses: actions/setup-go@v2
       - name: run golangci-lint
         uses: reviewdog/action-golangci-lint@v1
         with:
