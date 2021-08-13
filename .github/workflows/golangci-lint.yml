@@ -17,4 +17,4 @@ jobs:
           reporter: github-pr-preview
           filter_mode: diff_context
           fail_on_error: false
-          golangci_lint_glags: '--timeout=5'
+          golangci_lint_flags: '--timeout=5'
