@@ -90,7 +90,7 @@ func (h *WebSubHandler) ReceiveNotification(c *gin.Context) {
 
 			// 既に通知が送られていて、開始時刻が一緒の場合は通知しない
 			if alreadySent {
-				if videoData.ScheduledAt == liveData.ScheduledStartTime {
+				if videoData.ScheduledAt.Equal(liveData.ScheduledStartTime) {
 					log.Printf("notification is already sent: videoID=%s", videoID)
 					return
 				} else {
