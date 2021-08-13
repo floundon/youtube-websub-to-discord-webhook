@@ -14,7 +14,7 @@ jobs:
       - name: run golangci-lint
         uses: reviewdog/action-golangci-lint@v1
         with:
-          reporter: github-pr-preview
+          reporter: github-pr-review
           filter_mode: diff_context
           fail_on_error: false
           golangci_lint_flags: '--timeout=5m'
