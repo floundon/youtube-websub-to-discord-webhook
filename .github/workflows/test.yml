@@ -1,8 +1,5 @@
 name: test
-on:
-  push:
-    branches:
-      - *
+on: [pull_request]
 jobs:
   test:
     name: test
